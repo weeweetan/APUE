@@ -4,8 +4,8 @@
 
 #include "ourhdr.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
-    printf("hello world from process ID %d\n", getpid());
+    printf("hello world from process ID %ld\n", (long)getpid());
     exit(0);
 }

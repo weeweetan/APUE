@@ -9,7 +9,7 @@
 char buf1[] = "abcdefghij";
 char buf2[] = "ABCDEFGHIJ";
 
-int main(int argc, char **argv)
+int main(void)
 {
     int fd;
     if ((fd = creat("file.hole", FILE_MODE)) < 0)

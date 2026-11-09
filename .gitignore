@@ -1,0 +1,10 @@
+/build*/
+*.o
+*.a
+*.out
+core
+core.*
+file.hole
+__pycache__/
+*.py[cod]
+.DS_Store
