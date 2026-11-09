@@ -3,8 +3,8 @@
 //
 #include "ourhdr.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
-    printf("uid = %d, gid = %d\n", getuid(), getgid());
+    printf("uid = %lu, gid = %lu\n", (unsigned long)getuid(), (unsigned long)getgid());
     exit(0);
 }

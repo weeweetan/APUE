@@ -6,7 +6,7 @@
 
 #define BUFFSIZE 8192
 
-int main(int argc, char **argv)
+int main(void)
 {
     int     n;
     char    buf[BUFFSIZE];
