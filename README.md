@@ -37,6 +37,12 @@ printf 'hello\n' | ./build/bin/example-1-2
 
 `example-3-2` 在当前目录创建并覆盖 `file.hole`，建议在临时目录运行。自动测试只在临时目录生成文件，不运行交互 shell、守护进程或需要特权的实验。
 
+## 描述符复制边界
+
+`example-1-2` 与 `example-3-3` 是阻塞描述符的复制示例：读到数据后，循环写完当前缓冲区再继续读取。短读和短写均按实际字节数推进；读写被 `EINTR` 中断时重试，其他错误立即以非零状态退出。正长度写入返回 0 时报告无进展错误，避免重试循环停滞，也不使用未由该次调用设置的 errno。
+
+返回值与中断语义可对照 Linux man-pages 的 [read(2)](https://man7.org/linux/man-pages/man2/read.2.html) 和 [write(2)](https://man7.org/linux/man-pages/man2/write.2.html)。回归使用真实管道传递二进制数据，并仅在测试目标中启用 I/O 替身，控制短读 / 短写、一次和重复中断、已复制部分数据后的永久错误，以及零进展写入。测试驱动包含原章节源码，直接验证其复制循环。
+
 ## 公共错误输出
 
 [ourhdr.h](ourhdr.h) 仅保留声明，`err_msg`、`err_ret`、`err_quit`、`err_sys`、`err_dump` 的实现位于 [lib/error.c](lib/error.c)。直接编译章节文件时需要链接它：

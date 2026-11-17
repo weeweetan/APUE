@@ -7,13 +7,26 @@
 
 int main(void)
 {
-    int n;
+    ssize_t n;
     char buf[BUFFSIZE];
 
-    while ((n = read(STDIN_FILENO, buf, BUFFSIZE)) > 0)
-        if (write(STDOUT_FILENO, buf, n) != n)
-            err_sys("write error");
-    if (n < 0)
-        err_sys("read error");
+    for (;;) {
+        n = read(STDIN_FILENO, buf, sizeof buf);
+        if (n == 0) break;
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            err_sys("read error");
+        }
+        size_t written = 0;
+        while (written < (size_t)n) {
+            ssize_t count = write(STDOUT_FILENO, buf + written, (size_t)n - written);
+            if (count < 0) {
+                if (errno == EINTR) continue;
+                err_sys("write error");
+            }
+            if (count == 0) err_quit("write error: zero bytes written");
+            written += (size_t)count;
+        }
+    }
     exit(0);
 }
