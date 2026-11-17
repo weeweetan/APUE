@@ -9,9 +9,9 @@ import tempfile
 BINARY = Path(sys.argv[1]).resolve()
 
 
-def run(name, *arguments, input=b'', code=0, cwd=None):
+def run(name, *arguments, input=b'', code=0, cwd=None, env=None):
     result = subprocess.run([str(BINARY / name), *map(str, arguments)], input=input,
-                            capture_output=True, timeout=10, cwd=cwd)
+                            capture_output=True, timeout=10, cwd=cwd, env=env)
     assert result.returncode == code, (name, result.returncode, result.stderr)
     for marker in [b'AddressSanitizer', b'UndefinedBehaviorSanitizer', b'runtime error:', b'LeakSanitizer']:
         assert marker not in result.stderr, result.stderr
@@ -49,5 +49,26 @@ def examples():
         assert b'fcntl error' in run('example-3-4', '-1', code=1).stderr
 
 
-{'errors': errors, 'examples': examples}[sys.argv[2]]()
+def copies():
+    payload = bytes(range(256)) * 256 + b'tail without newline'
+    for name in ['test-copy-1-2', 'test-copy-3-3']:
+        for mode in ['normal', 'short-read', 'short-write', 'read-eintr', 'write-eintr', 'mixed']:
+            env = dict(os.environ, APUE_COPY_MODE=mode)
+            for data in [b'', payload]:
+                result = run(name, input=data, env=env)
+                assert result.stdout == data and result.stderr == b'', (name, mode)
+        for mode, expected, message in [
+            ('read-error', b'', os.strerror(errno.EIO).encode()),
+            ('read-error-after-data', payload[:11], os.strerror(errno.EIO).encode()),
+            ('write-error', b'', os.strerror(errno.ENOSPC).encode()),
+            ('write-error-after-data', payload[:7], os.strerror(errno.ENOSPC).encode()),
+            ('write-zero', b'', b'zero bytes written'),
+            ('write-zero-after-data', payload[:7], b'zero bytes written'),
+        ]:
+            result = run(name, input=payload, code=1, env=dict(os.environ, APUE_COPY_MODE=mode))
+            assert result.stdout == expected, (name, mode)
+            assert message in result.stderr, (name, mode, result.stderr)
+
+
+{'errors': errors, 'examples': examples, 'copies': copies}[sys.argv[2]]()
 print(sys.argv[2] + ': regression checks passed')
