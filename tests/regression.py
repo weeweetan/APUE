@@ -48,6 +48,23 @@ def examples():
         assert b'usage:' in run('example-3-4', code=1).stderr
         assert b'fcntl error' in run('example-3-4', '-1', code=1).stderr
 
+        readable = run('example-4-2', root / 'sample')
+        assert readable.stdout.splitlines() == [b'read access OK', b'open for reading OK']
+        assert readable.stderr == b''
+        unreadable = root / 'unreadable'
+        unreadable.write_bytes(b'example')
+        unreadable.chmod(0)
+        try:
+            # A privileged test runner can read mode-000 files; only assert the
+            # permission distinction when the runner is actually denied read access.
+            if os.access(unreadable, os.F_OK) and not os.access(unreadable, os.R_OK):
+                denied = run('example-4-2', unreadable)
+                assert b'read access OK' not in denied.stdout
+                assert b'access error for' in denied.stderr
+                assert b'open error for' in denied.stderr
+        finally:
+            unreadable.chmod(0o600)
+
 
 def copies():
     payload = bytes(range(256)) * 256 + b'tail without newline'
