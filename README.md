@@ -14,7 +14,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-目前纳入构建和回归检查的是下列 10 个基础示例；其他章节尚未纳入，后续逐步整理。`apue.h` 的历史录入错误与其他章节缺失的辅助函数也尚未修复，不能据此认为全部章节可直接构建。
+目前纳入构建和回归检查的是下列 11 个基础示例；其他章节尚未纳入，后续逐步整理。`apue.h` 的历史录入错误与其他章节缺失的辅助函数也尚未修复，不能据此认为全部章节可直接构建。
 
 | 目标 | 原文件 | 内容 |
 | --- | --- | --- |
@@ -28,6 +28,7 @@ ctest --test-dir build --output-on-failure
 | example-3-2 | [3-2.c](3-2.c) | 创建带空洞的文件 |
 | example-3-3 | [3-3.c](3-3.c) | 文件描述符复制 |
 | example-3-4 | [3-4.c](3-4.c) | 查询文件描述符标志 |
+| example-4-2 | [4-2.c](4-2.c) | 对比 `access(R_OK)` 与 `open(O_RDONLY)` |
 
 ```sh
 ./build/bin/example-1-1 .
@@ -36,6 +37,8 @@ printf 'hello\n' | ./build/bin/example-1-2
 ```
 
 `example-3-2` 在当前目录创建并覆盖 `file.hole`，建议在临时目录运行。自动测试只在临时目录生成文件，不运行交互 shell、守护进程或需要特权的实验。
+
+`example-4-2` 用 `R_OK` 查询真实用户的读权限，再用 `open(O_RDONLY)` 尝试打开文件；两次结果可能因真实与有效用户 ID 不同而不同。`F_OK` 只能检查文件是否存在，不能支撑“可读”的输出。参见 [access(2)](https://man7.org/linux/man-pages/man2/access.2.html)。
 
 ## 描述符复制边界
 

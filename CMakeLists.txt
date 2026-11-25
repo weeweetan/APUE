@@ -27,7 +27,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Keep the book's source names; build only the verified introductory examples.
-foreach(example 1-1 1-2 1-3 1-4 1-6 1-7 3-1 3-2 3-3 3-4)
+foreach(example 1-1 1-2 1-3 1-4 1-6 1-7 3-1 3-2 3-3 3-4 4-2)
     add_executable(example-${example} ${example}.c)
     target_link_libraries(example-${example} PRIVATE apue_error)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
